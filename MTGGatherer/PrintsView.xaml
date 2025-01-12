@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MTGGatherer"
         mc:Ignorable="d"
-        Title="PrintsView" Height="450" Width="800">
+        Title="Select a Print" Height="450" Width="800">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <ItemsControl Name="CardItemsControl">
             <ItemsControl.ItemsPanel>

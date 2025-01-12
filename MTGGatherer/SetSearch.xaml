@@ -1,0 +1,30 @@
+﻿<Window x:Class="MTGGatherer.SetSearch"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MTGGatherer"
+        mc:Ignorable="d"
+        Title="Search for Sets" Height="450" Width="800">
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Label>Search:</Label>
+            <TextBox Name="SearchText" Grid.Column="1" TextChanged="RefineSets"/>
+        </Grid>
+        <DataGrid Name="SetList" Margin="0 0 5 0" Grid.Row="2" AutoGenerateColumns="True" IsReadOnly="True"/>
+        <DataGrid Name="SelectedSetsList" Margin="5 0 0 0" Grid.Column="1" Grid.Row="2" AutoGenerateColumns="True" IsReadOnly="True"/>
+    </Grid>
+</Window>

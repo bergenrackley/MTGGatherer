@@ -18,18 +18,19 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Label Grid.Row="0" Margin="10 0 0 0">MTGO Formatted Text</Label>
-        <TextBox Grid.Row="1" Grid.RowSpan="2" Name="DeckText" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch" Margin="10" AcceptsReturn="True" TextWrapping="Wrap"/>
-        <Label Grid.Row="0" Grid.Column="1" Margin="10 0 0 0">Preferred Set</Label>
+        <TextBox Grid.Row="1" Grid.RowSpan="2" Name="DeckText" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch" Margin="10 0 10 0" AcceptsReturn="True" TextWrapping="Wrap"/>
+        <Label Grid.Row="0" Grid.Column="1" Margin="10 0 0 0">Sets to Default to</Label>
         <Grid Grid.Row="1" Grid.Column="1" Margin="10 0 10 0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Name="SetNameTextBox" Grid.Column="0"></TextBox>
-            <Button Grid.Column="1">Browse Sets</Button>
+            <TextBox Margin="0 0 5 0" Name="SetNameTextBox" Grid.Column="0" IsReadOnly="True"></TextBox>
+            <Button Margin="5 0 5 0" Grid.Column="1" Name="SetsButton" Click="Click_Sets">Browse Sets</Button>
+            <CheckBox Margin="5 0 0 0" Grid.Column="2" VerticalAlignment="Center">Override All</CheckBox>
         </Grid>
-        <!--<DataGrid Grid.Row="1" Grid.Column="1" Margin="10" AutoGenerateColumns="True" Name="DeckLoadTable" IsReadOnly="True"></DataGrid>-->
+        <DataGrid Grid.Row="2" Grid.Column="1" Margin="10 10 10 0" AutoGenerateColumns="True" Name="DeckLoadTable" IsReadOnly="True"/>
         <Button Grid.Row="3" Margin="10" Click="Click_Parse" Name="ParseButton">Parse</Button>
     </Grid>
 </Window>

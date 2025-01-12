@@ -122,5 +122,11 @@ namespace MTGGatherer
                 return card;
             }
         }
+
+        private void Click_Sets(object sender, RoutedEventArgs e)
+        {
+            SetSearch setSearch = new SetSearch();
+            setSearch.Show();
+        }
     }
 }
