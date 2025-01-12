@@ -22,6 +22,8 @@ namespace MTGGatherer
     /// </summary>
     public partial class MainWindow : Window
     {
+        private DeckViewModel deckViewModel;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -29,20 +31,29 @@ namespace MTGGatherer
 
         private async void Click_Parse(object sender, RoutedEventArgs e)
         {
+            ParseButton.IsEnabled = false;
             string deckText = DeckText.Text;
             Deck deck = ParseDeckText(deckText);
+            deckViewModel = new DeckViewModel();
             foreach (var card in deck.Cards)
             {
+                ScryfallCard scryfallCard;
                 if (card.CatID == 0)
+                    scryfallCard = await GetScryfallCardByNameAsync(card.Name);
+                else
+                    scryfallCard = await GetScryfallCardByIDAsync(card.CatID);
+
+                if (scryfallCard.ImageUris ==  null && scryfallCard.CardFaces != null)
                 {
-                    ScryfallCard scryfallCard = await GetScryfallCardByNameAsync(card.Name);
-                    Trace.WriteLine($"Card Name: {scryfallCard.Name}, Set: {scryfallCard.SetName}");
-                } else
-                {
-                    ScryfallCard scryfallCard = await GetScryfallCardByIDAsync(card.CatID); 
-                    Trace.WriteLine($"Card Name: {scryfallCard.Name}, Set: {scryfallCard.SetName}");
+                    scryfallCard.ImageUris = scryfallCard.CardFaces.FirstOrDefault().ImageUris;
                 }
+
+                for (int i = 0; i < card.Quantity; i++)
+                    deckViewModel.AddCard(scryfallCard);
+                DeckLoadTable.ItemsSource = deckViewModel.Cards;
             }
+            DeckEditor deckEditor = new DeckEditor(deckViewModel); 
+            deckEditor.Show();
         }
 
         private Deck ParseDeckText(string deckText)
@@ -74,8 +85,6 @@ namespace MTGGatherer
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/signed-exchange", 0.7));
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
                 HttpResponseMessage response = await client.GetAsync(url); 
-                String test = await response.Content.ReadAsStringAsync();
-                Trace.WriteLine(test);
                 if (!response.IsSuccessStatusCode) { 
                     string errorMessage = $"Error: {response.StatusCode} - {response.ReasonPhrase}"; 
                     MessageBox.Show(errorMessage); 
@@ -102,8 +111,6 @@ namespace MTGGatherer
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/signed-exchange", 0.7));
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
                 HttpResponseMessage response = await client.GetAsync(url);
-                String test = await response.Content.ReadAsStringAsync();
-                Trace.WriteLine(test);
                 if (!response.IsSuccessStatusCode)
                 {
                     string errorMessage = $"Error: {response.StatusCode} - {response.ReasonPhrase}";

@@ -13,11 +13,23 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Label Grid.Row="0" Margin="10 00 0 0">MTGO Formatted Text</Label>
-        <TextBox Grid.Row="1" Name="DeckText" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch" Margin="10" AcceptsReturn="True" TextWrapping="Wrap"/>
-        <Button Grid.Row="2" Margin="10" Click="Click_Parse">Parse</Button>
+        <Label Grid.Row="0" Margin="10 0 0 0">MTGO Formatted Text</Label>
+        <TextBox Grid.Row="1" Grid.RowSpan="2" Name="DeckText" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch" Margin="10" AcceptsReturn="True" TextWrapping="Wrap"/>
+        <Label Grid.Row="0" Grid.Column="1" Margin="10 0 0 0">Preferred Set</Label>
+        <Grid Grid.Row="1" Grid.Column="1" Margin="10 0 10 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Name="SetNameTextBox" Grid.Column="0"></TextBox>
+            <Button Grid.Column="1">Browse Sets</Button>
+        </Grid>
+        <!--<DataGrid Grid.Row="1" Grid.Column="1" Margin="10" AutoGenerateColumns="True" Name="DeckLoadTable" IsReadOnly="True"></DataGrid>-->
+        <Button Grid.Row="3" Margin="10" Click="Click_Parse" Name="ParseButton">Parse</Button>
     </Grid>
 </Window>
