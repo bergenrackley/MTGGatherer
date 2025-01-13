@@ -20,11 +20,28 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
             <Label>Search:</Label>
-            <TextBox Name="SearchText" Grid.Column="1" TextChanged="RefineSets"/>
+            <TextBox Name="SearchText" IsEnabled="False"  Grid.Column="1" TextChanged="RefineSets"/>
+            <Button Margin="10 0 5 0" Padding="10 0 10 0" Grid.Row="0" Grid.Column="2" Click="Click_Save">Save</Button>
+            <Button Margin="5 0 0 0" Padding="10 0 10 0" Grid.Row="0" Grid.Column="3" Click="Click_Cancel">Cancel</Button>
         </Grid>
-        <DataGrid Name="SetList" Margin="0 0 5 0" Grid.Row="2" AutoGenerateColumns="True" IsReadOnly="True"/>
-        <DataGrid Name="SelectedSetsList" Margin="5 0 0 0" Grid.Column="1" Grid.Row="2" AutoGenerateColumns="True" IsReadOnly="True"/>
+        <DataGrid Name="SetList" Margin="0 0 5 0" Grid.Row="2" AutoGenerateColumns="True" AutoGeneratingColumn="SetList_AutoGeneratingColumn"/>
+        <DataGrid Name="SelectedSetsList" Margin="5 0 0 0" Grid.Column="1" Grid.Row="2" AutoGenerateColumns="True" AutoGeneratingColumn="SelectedSetsList_AutoGeneratingColumn" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Reorder">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Name="ReorderUp" Content="▲" Width="25" Height="25" Click="UpButton_Click"/>
+                                <Button Name="ReorderDown" Content="▼" Width="25" Height="25" Click="DownButton_Click"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Window>

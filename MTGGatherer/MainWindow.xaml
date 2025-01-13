@@ -26,9 +26,9 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Margin="0 0 5 0" Name="SetNameTextBox" Grid.Column="0" IsReadOnly="True"></TextBox>
+            <TextBox HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Stretch" Margin="0 0 5 0" Name="SetsTextBox" Grid.Column="0" IsReadOnly="True"></TextBox>
             <Button Margin="5 0 5 0" Grid.Column="1" Name="SetsButton" Click="Click_Sets">Browse Sets</Button>
-            <CheckBox Margin="5 0 0 0" Grid.Column="2" VerticalAlignment="Center">Override All</CheckBox>
+            <CheckBox Name="OverrideCheckbox" Margin="5 0 0 0" Grid.Column="2" VerticalAlignment="Center">Override All</CheckBox>
         </Grid>
         <DataGrid Grid.Row="2" Grid.Column="1" Margin="10 10 10 0" AutoGenerateColumns="True" Name="DeckLoadTable" IsReadOnly="True"/>
         <Button Grid.Row="3" Margin="10" Click="Click_Parse" Name="ParseButton">Parse</Button>

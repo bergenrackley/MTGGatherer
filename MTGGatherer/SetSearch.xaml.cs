@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.IO;
 using System.Diagnostics;
+using Newtonsoft.Json.Serialization;
 
 namespace MTGGatherer
 {
@@ -26,6 +27,7 @@ namespace MTGGatherer
     {
         private ScryfallSetSearch sets;
         private List<ScryfallSet> allSets;
+        public List<ScryfallSet> selectedSets = new List<ScryfallSet>();
         public SetSearch()
         {
             InitializeComponent();
@@ -35,9 +37,11 @@ namespace MTGGatherer
         private async void LoadSets()
         {
             sets = await GetScryfallSetsAsync();
-            DataContext = sets;
+            //DataContext = sets;
             allSets = sets.Data;
             SetList.ItemsSource = sets.Data;
+            SelectedSetsList.ItemsSource = selectedSets;
+            SearchText.IsEnabled = true;
             SearchText.Focus();
         }
 
@@ -72,7 +76,102 @@ namespace MTGGatherer
         private void RefineSets(object sender, TextChangedEventArgs e)
         {
             sets.Data = allSets.Where(set => set.Name.Contains(SearchText.Text, StringComparison.OrdinalIgnoreCase)).ToList();
+            SetList.ItemsSource = null;
             SetList.ItemsSource = sets.Data;
+        }
+
+        private void SetList_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
+        {
+            if (e.PropertyName == "IsSelected")
+            {
+                var checkBoxColumn = e.Column as DataGridCheckBoxColumn;
+                if (checkBoxColumn != null)
+                {
+                    checkBoxColumn.IsReadOnly = false;
+                    checkBoxColumn.Header = string.Empty;
+
+                    Style checkBoxStyle = new Style(typeof(CheckBox)); 
+                    checkBoxStyle.Setters.Add(new EventSetter(CheckBox.CheckedEvent, new RoutedEventHandler(CheckBox_Checked))); 
+                    checkBoxStyle.Setters.Add(new EventSetter(CheckBox.UncheckedEvent, new RoutedEventHandler(CheckBox_Unchecked))); 
+                    checkBoxColumn.ElementStyle = checkBoxStyle;
+                }
+            }
+            else
+            {
+                e.Column.IsReadOnly = true;
+            }
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            CheckBox checkBox = sender as CheckBox;
+            DataGridRow dataGridRow = DataGridRow.GetRowContainingElement(checkBox);
+            if (dataGridRow != null && !selectedSets.Contains(dataGridRow.Item as ScryfallSet))
+            {
+                ScryfallSet item = dataGridRow.Item as ScryfallSet;
+                item.IsSelected = true;
+                selectedSets.Add(item);
+                SelectedSetsList.ItemsSource = null;
+                SelectedSetsList.ItemsSource = selectedSets;
+            }
+        }
+
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            CheckBox checkBox = sender as CheckBox;
+            DataGridRow dataGridRow = DataGridRow.GetRowContainingElement(checkBox);
+            if (dataGridRow != null && selectedSets.Contains(dataGridRow.Item as ScryfallSet))
+            {
+                ScryfallSet item = dataGridRow.Item as ScryfallSet;
+                item.IsSelected = false;
+                selectedSets.Remove(item);
+                SelectedSetsList.ItemsSource = null;
+                SelectedSetsList.ItemsSource = selectedSets;
+            }
+        }
+
+        private void SelectedSetsList_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
+        {
+            if (e.PropertyName == "IsSelected") e.Cancel = true;
+        }
+
+        private void UpButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            DataGridRow dataGridRow = DataGridRow.GetRowContainingElement(button);
+            var item = dataGridRow.Item as ScryfallSet;
+            int index = selectedSets.IndexOf(item);
+            if (index != 0) index -= 1;
+            selectedSets.Remove(item);
+            selectedSets.Insert(index, item);
+
+            SelectedSetsList.ItemsSource = null;
+            SelectedSetsList.ItemsSource = selectedSets;
+        }
+
+        private void DownButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            DataGridRow dataGridRow = DataGridRow.GetRowContainingElement(button);
+            var item = dataGridRow.Item as ScryfallSet;
+            int index = selectedSets.IndexOf(item);
+            if (index < selectedSets.Count - 1) index += 1;
+            selectedSets.Remove(item);
+            selectedSets.Insert(index, item);
+
+            SelectedSetsList.ItemsSource = null;
+            SelectedSetsList.ItemsSource = selectedSets;
+        }
+
+        private void Click_Save(object sender, RoutedEventArgs e)
+        {
+            DialogResult = true;
+            Close();
+        }
+
+        private void Click_Cancel(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
     }
 }
