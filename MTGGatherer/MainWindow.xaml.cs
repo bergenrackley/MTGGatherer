@@ -25,7 +25,7 @@ namespace MTGGatherer
     public partial class MainWindow : Window
     {
         private DeckViewModel deckViewModel;
-        private List<ScryfallSet> selectedSets;
+        private List<ScryfallSet> selectedSets = new List<ScryfallSet>();
 
         public MainWindow()
         {
@@ -35,6 +35,10 @@ namespace MTGGatherer
         private async void Click_Parse(object sender, RoutedEventArgs e)
         {
             ParseButton.IsEnabled = false;
+            DeckText.IsEnabled = false;
+            SetsButton.IsEnabled = false;
+            OverrideCheckbox.IsEnabled = false;
+
             string deckText = DeckText.Text;
             Deck deck = ParseDeckText(deckText);
             deckViewModel = new DeckViewModel();
@@ -67,7 +71,15 @@ namespace MTGGatherer
                 DeckLoadTable.ItemsSource = deckViewModel.Cards;
             }
             DeckEditor deckEditor = new DeckEditor(deckViewModel);
-            deckEditor.Show();
+            if (deckEditor.ShowDialog() == true)
+            {
+                return;
+            }
+
+            ParseButton.IsEnabled = true;
+            DeckText.IsEnabled = true;
+            SetsButton.IsEnabled = true;
+            OverrideCheckbox.IsEnabled = true;
         }
 
         private Deck ParseDeckText(string deckText)
