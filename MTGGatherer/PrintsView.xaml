@@ -6,7 +6,13 @@
         xmlns:local="clr-namespace:MTGGatherer"
         mc:Ignorable="d"
         Title="Select a Print" Height="450" Width="800">
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <ComboBox Grid.Row="0" DisplayMemberPath="Name" SelectionChanged="RefinePrints" Margin="10" Name="ComboBox" IsEditable="True" Text="Select an item"/>
+    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
         <ItemsControl Name="CardItemsControl">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -26,4 +32,5 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
     </ScrollViewer>
+    </Grid>
 </Window>

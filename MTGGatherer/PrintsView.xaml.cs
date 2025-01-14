@@ -1,6 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Net.Http;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -19,20 +23,93 @@ namespace MTGGatherer
     /// </summary>
     public partial class PrintsView : Window
     {
-        private DeckViewModel deckViewModel;
+        private List<ScryfallCard> comboboxPrints;
+        private List<ScryfallCard> allPrints;
         public ScryfallCard selectedPrint;
-        public PrintsView(DeckViewModel DVM)
+        
+        public PrintsView(string cardName)
         {
             InitializeComponent();
-            deckViewModel = DVM;
-            foreach (ScryfallCard card in deckViewModel.Cards)
+            LoadCards(cardName);
+        }
+
+        public async void LoadCards(string cardName)
+        {
+            ScryfallSetSearch sets = await GetScryfallSetsAsync();
+            ComboBox.ItemsSource = sets.Data;
+            ScryfallSearch search = await GetAlternatePrintsAsync(cardName);
+            allPrints = search.Data;
+            comboboxPrints = allPrints;
+            foreach (ScryfallCard card in comboboxPrints)
             {
                 if (card.ImageUris == null && card.CardFaces != null)
                 {
                     card.ImageUris = card.CardFaces.FirstOrDefault().ImageUris;
                 }
             }
-            CardItemsControl.ItemsSource = deckViewModel.Cards;
+            CardItemsControl.ItemsSource = comboboxPrints;
+        }
+
+        private async Task<ScryfallSetSearch> GetScryfallSetsAsync()
+        {
+            string url = "https://api.scryfall.com/sets";
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/html"));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xhtml+xml"));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml", 0.9));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("image/avif"));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("image/webp"));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("image/apng"));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*", 0.8));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/signed-exchange", 0.7));
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+                HttpResponseMessage response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorMessage = $"Error: {response.StatusCode} - {response.ReasonPhrase}";
+                    MessageBox.Show(errorMessage);
+                    throw new HttpRequestException(errorMessage);
+                }
+                string jsonResponse = await response.Content.ReadAsStringAsync();
+                ScryfallSetSearch search = JsonConvert.DeserializeObject<ScryfallSetSearch>(jsonResponse);
+                return search;
+            }
+        }
+
+        private async Task<ScryfallSearch> GetAlternatePrintsAsync(string name, int page = 1)
+        {
+            string url = $"https://api.scryfall.com/cards/search?unique=prints&q={WebUtility.UrlEncode(name)}&page={page}";
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/html"));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xhtml+xml"));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml", 0.9));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("image/avif"));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("image/webp"));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("image/apng"));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*", 0.8));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/signed-exchange", 0.7));
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+                HttpResponseMessage response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorMessage = $"Error: {response.StatusCode} - {response.ReasonPhrase}";
+                    MessageBox.Show(errorMessage);
+                    throw new HttpRequestException(errorMessage);
+                }
+                string jsonResponse = await response.Content.ReadAsStringAsync();
+                ScryfallSearch prints = JsonConvert.DeserializeObject<ScryfallSearch>(jsonResponse);
+                prints.Data = prints.Data.Where(e => e.Name == name).ToList();
+                if (prints.HasMore)
+                {
+                    ScryfallSearch nextPage = await GetAlternatePrintsAsync(name, page + 1);
+                    prints.Data.AddRange(nextPage.Data);
+                }
+                return prints;
+            }
         }
 
         private void Card_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -43,6 +120,17 @@ namespace MTGGatherer
                 selectedPrint = card;
                 DialogResult = true;
                 Close();
+            }
+        }
+
+        private void RefinePrints(object sender, SelectionChangedEventArgs e)
+        {
+            ScryfallSet selectedSet = ComboBox.SelectedItem as ScryfallSet;
+            if (selectedSet != null && selectedSet.Set != null)
+            {
+                CardItemsControl.ItemsSource = null;
+                comboboxPrints = allPrints.Where(e => e.Set == selectedSet.Set).ToList();
+                CardItemsControl.ItemsSource = comboboxPrints;
             }
         }
     }
