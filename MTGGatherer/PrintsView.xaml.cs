@@ -15,6 +15,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Diagnostics;
 
 namespace MTGGatherer
 {
@@ -23,8 +24,8 @@ namespace MTGGatherer
     /// </summary>
     public partial class PrintsView : Window
     {
-        private List<ScryfallCard> comboboxPrints;
-        private List<ScryfallCard> allPrints;
+        private List<ScryfallCard> prints;
+        public string name;
         public ScryfallCard selectedPrint;
         
         public PrintsView(string cardName)
@@ -36,18 +37,19 @@ namespace MTGGatherer
         public async void LoadCards(string cardName)
         {
             ScryfallSetSearch sets = await GetScryfallSetsAsync();
-            ComboBox.ItemsSource = sets.Data;
-            ScryfallSearch search = await GetAlternatePrintsAsync(cardName);
-            allPrints = search.Data;
-            comboboxPrints = allPrints;
-            foreach (ScryfallCard card in comboboxPrints)
+            SetsComboBox.ItemsSource = sets.Data;
+            name = cardName;
+            ScryfallSearch search = await GetAlternatePrintsAsync();
+            prints = search.Data;
+            foreach (ScryfallCard card in prints)
             {
                 if (card.ImageUris == null && card.CardFaces != null)
                 {
                     card.ImageUris = card.CardFaces.FirstOrDefault().ImageUris;
                 }
             }
-            CardItemsControl.ItemsSource = comboboxPrints;
+            CardItemsControl.ItemsSource = prints;
+            SetsComboBox.IsEnabled = true;
         }
 
         private async Task<ScryfallSetSearch> GetScryfallSetsAsync()
@@ -78,9 +80,11 @@ namespace MTGGatherer
             }
         }
 
-        private async Task<ScryfallSearch> GetAlternatePrintsAsync(string name, int page = 1)
+        private async Task<ScryfallSearch> GetAlternatePrintsAsync(string set = null)
         {
-            string url = $"https://api.scryfall.com/cards/search?unique=prints&q={WebUtility.UrlEncode(name)}&page={page}";
+            if (set != null) set = " e:" + set;
+            string url = $"https://api.scryfall.com/cards/search?unique=prints&q={WebUtility.UrlEncode(name)}{set}";
+            Trace.TraceError(url);
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Accept.Clear();
@@ -97,17 +101,12 @@ namespace MTGGatherer
                 if (!response.IsSuccessStatusCode)
                 {
                     string errorMessage = $"Error: {response.StatusCode} - {response.ReasonPhrase}";
-                    MessageBox.Show(errorMessage);
+                    return new ScryfallSearch();
                     throw new HttpRequestException(errorMessage);
                 }
                 string jsonResponse = await response.Content.ReadAsStringAsync();
                 ScryfallSearch prints = JsonConvert.DeserializeObject<ScryfallSearch>(jsonResponse);
                 prints.Data = prints.Data.Where(e => e.Name == name).ToList();
-                if (prints.HasMore)
-                {
-                    ScryfallSearch nextPage = await GetAlternatePrintsAsync(name, page + 1);
-                    prints.Data.AddRange(nextPage.Data);
-                }
                 return prints;
             }
         }
@@ -123,14 +122,15 @@ namespace MTGGatherer
             }
         }
 
-        private void RefinePrints(object sender, SelectionChangedEventArgs e)
+        private async void RefinePrints(object sender, SelectionChangedEventArgs e)
         {
-            ScryfallSet selectedSet = ComboBox.SelectedItem as ScryfallSet;
+            ScryfallSet selectedSet = SetsComboBox.SelectedItem as ScryfallSet;
             if (selectedSet != null && selectedSet.Set != null)
             {
                 CardItemsControl.ItemsSource = null;
-                comboboxPrints = allPrints.Where(e => e.Set == selectedSet.Set).ToList();
-                CardItemsControl.ItemsSource = comboboxPrints;
+                ScryfallSearch setSearch = await GetAlternatePrintsAsync(selectedSet.Set);
+                prints = setSearch.Data;
+                CardItemsControl.ItemsSource = prints;
             }
         }
     }

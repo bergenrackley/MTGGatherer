@@ -11,7 +11,7 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <ComboBox Grid.Row="0" DisplayMemberPath="Name" SelectionChanged="RefinePrints" Margin="10" Name="ComboBox" IsEditable="True" Text="Select an item"/>
+        <ComboBox Grid.Row="0" DisplayMemberPath="Name" SelectionChanged="RefinePrints" Margin="10" Name="SetsComboBox" IsEditable="True" IsEnabled="False" Text="Select an item"/>
     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
         <ItemsControl Name="CardItemsControl">
             <ItemsControl.ItemsPanel>
