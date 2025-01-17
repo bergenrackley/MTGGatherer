@@ -32,8 +32,6 @@ namespace MTGGatherer
 
         private async void Click_AltPrints(object sender, RoutedEventArgs e)
         {
-            AltPrints.IsEnabled = false;
-            Save.IsEnabled = false;
             PrintsView printsView = new PrintsView(card.Name);
             if (printsView.ShowDialog() == true)
             {
@@ -41,14 +39,22 @@ namespace MTGGatherer
                 card = selectedCard;
                 DataContext = card;
             }
-            AltPrints.IsEnabled = true;
-            Save.IsEnabled = true;
         }
 
         private void Click_Save(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
             Close();
+        }
+
+        private void Click_ReplaceCards(object sender, RoutedEventArgs e)
+        {
+            ReplaceCardDialog replaceCardDialog = new ReplaceCardDialog();
+            if (replaceCardDialog.ShowDialog() == true)
+            {
+                card = replaceCardDialog.replacementCard;
+                DataContext = card;
+            }
         }
     }
 }
