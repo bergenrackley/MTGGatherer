@@ -41,13 +41,6 @@ namespace MTGGatherer
             name = cardName;
             ScryfallSearch search = await GetAlternatePrintsAsync();
             prints = search.Data;
-            foreach (ScryfallCard card in prints)
-            {
-                if (card.ImageUris == null && card.CardFaces != null)
-                {
-                    card.ImageUris = card.CardFaces.FirstOrDefault().ImageUris;
-                }
-            }
             CardItemsControl.ItemsSource = prints;
             SetsComboBox.IsEnabled = true;
         }
@@ -84,7 +77,6 @@ namespace MTGGatherer
         {
             if (set != null) set = " e:" + set;
             string url = $"https://api.scryfall.com/cards/search?unique=prints&q={WebUtility.UrlEncode(name)}{set}";
-            Trace.TraceError(url);
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Accept.Clear();

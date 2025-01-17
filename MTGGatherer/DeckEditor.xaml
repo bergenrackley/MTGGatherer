@@ -6,7 +6,16 @@
         xmlns:local="clr-namespace:MTGGatherer"
         mc:Ignorable="d"
         Title="Deck Editor" Height="600" Width="800">
-        <ListBox Name="CardItemsListBox" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="CardItemsListBox_SelectionChanged">
+    <Window.Resources>
+        <local:GetFaceConverter x:Key="GetFaceConverter"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Button Click="Click_Export" Grid.Row="0" HorizontalAlignment="Right" Margin="10" Width="100">Export</Button>
+        <ListBox Grid.Row="1" Name="CardItemsListBox" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="CardItemsListBox_SelectionChanged">
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel/>
@@ -16,11 +25,13 @@
                 <DataTemplate>
                     <Border BorderThickness="1" BorderBrush="Black" Margin="5">
                         <StackPanel>
-                            <Image Source="{Binding ImageUris.Normal}" Width="200" Height="280"/>
+                            <!--<Image Name="CardImage" Source="{Binding ImageUris.Normal}" Width="200" Height="280"/>-->
+                            <Image Source="{Binding ., Converter={StaticResource GetFaceConverter}}" Width="200" Height="280"/>
                             <TextBlock Text="{Binding Name}" TextAlignment="Center" Margin="5"/>
                         </StackPanel>
                     </Border>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+    </Grid>
 </Window>

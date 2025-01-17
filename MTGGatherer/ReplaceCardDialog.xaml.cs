@@ -35,7 +35,7 @@ namespace MTGGatherer
             {
                 SearchButton.IsEnabled = false;
                 ScryfallCard searchCard = await GetScryfallCardByNameAsync(SearchText.Text);
-                if (searchCard != null || searchCard == new ScryfallCard())
+                if (searchCard != null && !string.IsNullOrEmpty(searchCard.Name))
                 {
                     if (MessageBox.Show($"Is this your card: {searchCard.Name}",
                         "Is this your card?",
@@ -77,6 +77,7 @@ namespace MTGGatherer
                 }
                 string jsonResponse = await response.Content.ReadAsStringAsync();
                 ScryfallCard card = JsonConvert.DeserializeObject<ScryfallCard>(jsonResponse);
+
                 return card;
             }
         }

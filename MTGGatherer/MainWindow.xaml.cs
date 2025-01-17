@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Win32;
+using Newtonsoft.Json;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
@@ -35,48 +36,54 @@ namespace MTGGatherer
         private async void Click_Parse(object sender, RoutedEventArgs e)
         {
             ParseButton.IsEnabled = false;
+            FileButton.IsEnabled = false;
             DeckText.IsEnabled = false;
             SetsButton.IsEnabled = false;
             OverrideCheckbox.IsEnabled = false;
 
             string deckText = DeckText.Text;
             Deck deck = ParseDeckText(deckText);
-            deckViewModel = new DeckViewModel();
-            foreach (var card in deck.Cards)
+            if (deck == null || deck.Cards == null || deck.Cards.Count == 0)
             {
-                ScryfallCard scryfallCard = null;
-                if (card.CatID == 0 || OverrideCheckbox.IsChecked == true)
-                {
-                    foreach (ScryfallSet set in selectedSets)
-                    {
-                        scryfallCard = await GetScryfallCardByNameAsync(card.Name, set.Set);
-                        if (scryfallCard.Set == set.Set) break;
-                    }
-                    if (scryfallCard == null || String.IsNullOrEmpty(scryfallCard.Name))
-                    {
-                        if (card.CatID == 0) scryfallCard = await GetScryfallCardByNameAsync(card.Name);
-                        else scryfallCard = await GetScryfallCardByIDAsync(card.CatID);
-                    }
-                }
-                else scryfallCard = await GetScryfallCardByIDAsync(card.CatID);
-
-                if (scryfallCard == null) return;
-                else if (scryfallCard.ImageUris == null && scryfallCard.CardFaces != null)
-                {
-                    scryfallCard.ImageUris = scryfallCard.CardFaces.FirstOrDefault().ImageUris;
-                }
-
-                for (int i = 0; i < card.Quantity; i++)
-                    deckViewModel.AddCard(scryfallCard);
-                DeckLoadTable.ItemsSource = deckViewModel.Cards;
-            }
-            DeckEditor deckEditor = new DeckEditor(deckViewModel);
-            if (deckEditor.ShowDialog() == true)
-            {
+                MessageBox.Show("Error procesing file, check xaml or reexport", "Error");
                 return;
+            }
+            else
+            {
+                deckViewModel = new DeckViewModel();
+                foreach (var card in deck.Cards)
+                {
+                    ScryfallCard scryfallCard = null;
+                    if (card.CatID == 0 || OverrideCheckbox.IsChecked == true)
+                    {
+                        foreach (ScryfallSet set in selectedSets)
+                        {
+                            scryfallCard = await GetScryfallCardByNameAsync(card.Name, set.Set);
+                            if (scryfallCard.Set == set.Set) break;
+                        }
+                        if (scryfallCard == null || String.IsNullOrEmpty(scryfallCard.Name))
+                        {
+                            if (card.CatID == 0) scryfallCard = await GetScryfallCardByNameAsync(card.Name);
+                            else scryfallCard = await GetScryfallCardByIDAsync(card.CatID);
+                        }
+                    }
+                    else scryfallCard = await GetScryfallCardByIDAsync(card.CatID);
+
+                    if (scryfallCard == null) return;
+
+                    for (int i = 0; i < card.Quantity; i++)
+                        deckViewModel.AddCard(scryfallCard);
+                    DeckLoadTable.ItemsSource = deckViewModel.Cards;
+                }
+                DeckEditor deckEditor = new DeckEditor(deckViewModel);
+                if (deckEditor.ShowDialog() == true)
+                {
+                    return;
+                }
             }
 
             ParseButton.IsEnabled = true;
+            FileButton.IsEnabled = true;
             DeckText.IsEnabled = true;
             SetsButton.IsEnabled = true;
             OverrideCheckbox.IsEnabled = true;
@@ -162,6 +169,16 @@ namespace MTGGatherer
             {
                 selectedSets = setSearch.selectedSets;
                 SetsTextBox.Text = String.Join(", ", selectedSets.Select(x => x.Name));
+            }
+        }
+
+        private void Click_File(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog(); if (openFileDialog.ShowDialog() == true)
+            {
+                string filePath = openFileDialog.FileName; 
+                string fileContent = File.ReadAllText(filePath); 
+                DeckText.Text = fileContent;
             }
         }
     }

@@ -6,31 +6,34 @@
         xmlns:local="clr-namespace:MTGGatherer"
         mc:Ignorable="d"
         Title="Select a Print" Height="450" Width="800">
+    <Window.Resources>
+        <local:GetFaceConverter x:Key="GetFaceConverter"/>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <ComboBox Grid.Row="0" DisplayMemberPath="Name" SelectionChanged="RefinePrints" Margin="10" Name="SetsComboBox" IsEditable="True" IsEnabled="False" Text="Select an item"/>
-    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-        <ItemsControl Name="CardItemsControl">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <UniformGrid Columns="3" IsItemsHost="True"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Border BorderThickness="1" BorderBrush="Black" Margin="5" MouseLeftButtonUp="Card_Click">
-                        <StackPanel>
-                            <Image Source="{Binding ImageUris.Normal}" Width="200" Height="280"/>
-                            <TextBlock Text="{Binding SetName}" TextAlignment="Center" Margin="5"/>
-                            <TextBlock Text="{Binding FlavorName}" TextAlignment="Center" Margin="5"/>
-                        </StackPanel>
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </ScrollViewer>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ItemsControl Name="CardItemsControl">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="3" IsItemsHost="True"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="1" BorderBrush="Black" Margin="5" MouseLeftButtonUp="Card_Click">
+                            <StackPanel>
+                                <Image Source="{Binding ., Converter={StaticResource GetFaceConverter}}" Width="200" Height="280"/>
+                                <TextBlock Text="{Binding SetName}" TextAlignment="Center" Margin="5"/>
+                                <TextBlock Text="{Binding FlavorName}" TextAlignment="Center" Margin="5"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
     </Grid>
 </Window>

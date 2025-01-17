@@ -1,9 +1,12 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace MTGGatherer
 {
@@ -37,6 +40,20 @@ namespace MTGGatherer
         public string SetName { get; set; }
         [JsonProperty(PropertyName = "collector_number")]
         public string CollectorNumber { get; set; }
+        [JsonProperty(PropertyName = "all_parts")]
+        public List<RelatedCard> AllParts { get; set; }
+
+        public string GetFace()
+        {
+            if (ImageUris == null && CardFaces != null)
+            {
+                return CardFaces.FirstOrDefault().ImageUris.Normal;
+            }
+            else
+            {
+                return ImageUris.Normal;
+            }
+        }
     }
 
     public class CardFace
@@ -54,10 +71,38 @@ namespace MTGGatherer
         public string Large { get; set; }
         public string Png { get; set; }
         [JsonProperty(PropertyName = "art_crop")]
-
         public string ArtCrop { get; set; }
         [JsonProperty(PropertyName = "border_crop")]
-
         public string BorderCrop { get; set; }
     }
+
+    public class RelatedCard
+    {
+        [JsonProperty(PropertyName = "object")]
+        public string Object { get; set; }
+        [JsonProperty(PropertyName = "id")]
+        public string Id { get; set; }
+        [JsonProperty(PropertyName = "name")]
+        public string Name { get; set; }
+        [JsonProperty(PropertyName = "uri")]
+        public string Uri { get; set; }
+    }
+
+    public class GetFaceConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is ScryfallCard card)
+            {
+                return card.GetFace();
+            }
+            return null;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 }
