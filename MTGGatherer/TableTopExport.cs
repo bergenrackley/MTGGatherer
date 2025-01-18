@@ -45,6 +45,17 @@ namespace MTGGatherer
                     scaleY = 1;
                     scaleZ = 1;
                     break;
+                case 2:
+                    posX = 2.2;
+                    posY = 1;
+                    posZ = 0;
+                    rotX = 0;
+                    rotY = 180;
+                    rotZ = 0;
+                    scaleX = 1;
+                    scaleY = 1;
+                    scaleZ = 1;
+                    break;
             }
         }
     }

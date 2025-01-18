@@ -1,12 +1,14 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Globalization;
 using System.Linq;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using System.Windows.Input;
 
 namespace MTGGatherer
 {
@@ -53,6 +55,12 @@ namespace MTGGatherer
             {
                 return ImageUris.Normal;
             }
+        }
+
+        public List<String> GetFaces()
+        {
+            SettingsController settingsController = new SettingsController();
+            return CardFaces?.Select(card => card.ImageUris.Normal).ToList() ?? new List<String> { ImageUris.Normal, settingsController.GetConfigurationValue("CardBackUrl") };
         }
     }
 

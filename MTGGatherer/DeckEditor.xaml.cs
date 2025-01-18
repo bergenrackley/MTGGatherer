@@ -44,7 +44,7 @@ namespace MTGGatherer
             DeckCustom mainDeck = new DeckCustom();
             DeckCustom extrasDeck = new DeckCustom();
             List<String> mainArtUrls = new List<String>();
-            List<String> extraArtUrls = new List<String>();
+            List<List<String>> extraArtUrls = new List<List<String>>();
             foreach (ScryfallCard card in deckViewModel.Cards)
             {
                 if (!mainArtUrls.Contains(card.GetFace())) mainArtUrls.Add(card.GetFace());
@@ -55,13 +55,23 @@ namespace MTGGatherer
                 };
                 mainDeck.ContainedObjects.Add(tbCard);
 
+                if (card.CardFaces?.Count() >= 2)
+                {
+                    extraArtUrls.Add(card.GetFaces());
+                    TBCard doubleCard = new TBCard
+                    {
+                        CardID = extraArtUrls.Count() * 100,
+                        Nickname = card.FlavorName ?? card.Name
+                    };
+                    extrasDeck.ContainedObjects.Add(doubleCard);
+                }
+
                 if (card.AllParts != null && card.AllParts.Any())
                 {
                     foreach (RelatedCard relatedCard in card.AllParts.Where(relatedCard => relatedCard.Object == "related_card" && !deckViewModel.Cards.Where(e => relatedCard.Name == (e.FlavorName ?? e.Name)).Any() && !extrasDeck.ContainedObjects.Where(e => relatedCard.Name == e.Nickname).Any()).ToList())
                     {
                         ScryfallCard newCard = await GetScryfallCardByUri(relatedCard.Uri);
-                        MessageBox.Show(newCard.Name, "Error");
-                        extraArtUrls.Add(newCard.GetFace());
+                        extraArtUrls.Add(newCard.GetFaces());
                         TBCard extraCard = new TBCard
                         {
                             CardID = extraArtUrls.Count() * 100,
@@ -71,14 +81,16 @@ namespace MTGGatherer
                     };
                 }
             }
-            mainDeck.DeckIDs = mainDeck.ContainedObjects.Select(e => e.CardID).Distinct().ToList();
-            mainArtUrls.Select((url, index) => new { Index = index + 1, CustomCard = new CustomCard(url, "https://i.imgur.com/Hg8CwwU.jpeg") }).ToList().ForEach(item => mainDeck.CustomDeck.Add(item.Index.ToString(), item.CustomCard));
+            mainDeck.DeckIDs = mainDeck.ContainedObjects.Select(e => e.CardID).ToList();
+            SettingsController settingsController = new SettingsController();
+            mainArtUrls.Select((url, index) => new { Index = index + 1, CustomCard = new CustomCard(url, settingsController.GetConfigurationValue("CardBackUrl")) }).ToList().ForEach(item => mainDeck.CustomDeck.Add(item.Index.ToString(), item.CustomCard));
             mainDeck.Transform = new Transform(1);
             exportDeck.ObjectStates.Add(mainDeck);
 
-            extrasDeck.DeckIDs = extrasDeck.ContainedObjects.Select(e => e.CardID).Distinct().ToList();
-            extraArtUrls.Select((url, index) => new { Index = index + 1, CustomCard = new CustomCard(url, "https://i.imgur.com/Hg8CwwU.jpeg") }).ToList().ForEach(item => extrasDeck.CustomDeck.Add(item.Index.ToString(), item.CustomCard));
-
+            extrasDeck.DeckIDs = extrasDeck.ContainedObjects.Select(e => e.CardID).ToList();
+            extraArtUrls.Select((urls, index) => new { Index = index + 1, CustomCard = new CustomCard(urls[0], urls[1]) }).ToList().ForEach(item => extrasDeck.CustomDeck.Add(item.Index.ToString(), item.CustomCard));
+            extrasDeck.Transform = new Transform(2);
+            exportDeck.ObjectStates.Add(extrasDeck);
 
             SaveFileDialog saveFileDialog = new SaveFileDialog(); saveFileDialog.Filter = "JSON files (*.json)|*.json"; if (saveFileDialog.ShowDialog() == true)
             {

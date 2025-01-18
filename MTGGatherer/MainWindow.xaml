@@ -14,11 +14,12 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Label Grid.Row="0" Margin="10 0 0 0">MTGO Formatted Text</Label>
-        <TextBox Grid.Row="1" Grid.RowSpan="2" Name="DeckText" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch" Margin="10 0 10 0" AcceptsReturn="True" TextWrapping="Wrap"/>
+        <TextBox Grid.Row="1" Grid.RowSpan="3" Name="DeckText" VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch" Margin="10 0 10 0" AcceptsReturn="True" TextWrapping="Wrap"/>
         <Label Grid.Row="0" Grid.Column="1" Margin="10 0 0 0">Sets to Default to</Label>
         <Grid Grid.Row="1" Grid.Column="1" Margin="10 0 10 0">
             <Grid.ColumnDefinitions>
@@ -30,8 +31,16 @@
             <Button Margin="5 0 5 0" Grid.Column="1" Name="SetsButton" Click="Click_Sets">Browse Sets</Button>
             <CheckBox Name="OverrideCheckbox" Margin="5 0 0 0" Grid.Column="2" VerticalAlignment="Center">Override All</CheckBox>
         </Grid>
-        <DataGrid Grid.Row="2" Grid.Column="1" Margin="10 10 10 0" AutoGenerateColumns="True" Name="DeckLoadTable" IsReadOnly="True"/>
-        <UniformGrid Rows="1" Columns="2" Grid.Row="3" Grid.Column="0">
+        <Grid Grid.Row="2" Grid.Column="1" Margin="10 0 10 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBox HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Stretch" Margin="0 0 5 0" Grid.Column="0" IsReadOnly="True"></TextBox>
+            <Button Margin="5 0 5 0" Grid.Column="1" Click="Click_Sets">Browse Sets</Button>
+        </Grid>
+        <DataGrid Grid.Row="3" Grid.Column="1" Margin="10 10 10 0" AutoGenerateColumns="True" Name="DeckLoadTable" IsReadOnly="True"/>
+        <UniformGrid Rows="1" Columns="2" Grid.Row="4" Grid.Column="0">
             <Button Margin="10 10 5 10" Click="Click_File" Name="FileButton">Open File</Button>
             <Button Margin="5 10 10 10" Click="Click_Parse" Name="ParseButton">Parse</Button>
         </UniformGrid>
