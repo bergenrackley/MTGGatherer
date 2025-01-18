@@ -1,9 +1,12 @@
 ﻿using Microsoft.Win32;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,10 +30,28 @@ namespace MTGGatherer
     {
         private DeckViewModel deckViewModel;
         private List<ScryfallSet> selectedSets = new List<ScryfallSet>();
+        SettingsController settingsController = new SettingsController();
 
         public MainWindow()
         {
             InitializeComponent();
+
+            try
+            {
+                selectedSets = JsonConvert.DeserializeObject<List<ScryfallSet>>(settingsController.GetConfigurationValue("SetsList"));
+            }
+            catch
+            {
+                selectedSets = new List<ScryfallSet>();
+            }
+            LoadSetsList(selectedSets);
+        }
+
+        public void LoadSetsList(List<ScryfallSet> sets)
+        {
+            selectedSets = sets;
+            settingsController.SaveSettings(JsonConvert.SerializeObject(selectedSets, Formatting.Indented), "SetsList");
+            SetsTextBox.Text = String.Join(", ", selectedSets.Select(x => x.Name));
         }
 
         private async void Click_Parse(object sender, RoutedEventArgs e)
@@ -46,7 +67,6 @@ namespace MTGGatherer
             if (deck == null || deck.Cards == null || deck.Cards.Count == 0)
             {
                 MessageBox.Show("Error procesing file, check xaml or reexport", "Error");
-                return;
             }
             else
             {
@@ -56,6 +76,7 @@ namespace MTGGatherer
                     ScryfallCard scryfallCard = null;
                     if (card.CatID == 0 || OverrideCheckbox.IsChecked == true)
                     {
+                        //foreach (ScryfallSet set in selectedSets)
                         foreach (ScryfallSet set in selectedSets)
                         {
                             scryfallCard = await GetScryfallCardByNameAsync(card.Name, set.Set);
@@ -71,6 +92,7 @@ namespace MTGGatherer
 
                     if (scryfallCard == null) return;
 
+                    scryfallCard.Sideboard = card.Sideboard;
                     for (int i = 0; i < card.Quantity; i++)
                         deckViewModel.AddCard(scryfallCard);
                     DeckLoadTable.ItemsSource = deckViewModel.Cards;
@@ -78,7 +100,7 @@ namespace MTGGatherer
                 DeckEditor deckEditor = new DeckEditor(deckViewModel);
                 if (deckEditor.ShowDialog() == true)
                 {
-                    return;
+
                 }
             }
 
@@ -153,8 +175,6 @@ namespace MTGGatherer
                 {
                     string errorMessage = $"Error: {response.StatusCode} - {response.ReasonPhrase}";
                     return new ScryfallCard();
-                    //MessageBox.Show(errorMessage);
-                    //throw new HttpRequestException(errorMessage);
                 }
                 string jsonResponse = await response.Content.ReadAsStringAsync();
                 ScryfallCard card = JsonConvert.DeserializeObject<ScryfallCard>(jsonResponse);
@@ -165,11 +185,7 @@ namespace MTGGatherer
         private void Click_Sets(object sender, RoutedEventArgs e)
         {
             SetSearch setSearch = new SetSearch();
-            if (setSearch.ShowDialog() == true)
-            {
-                selectedSets = setSearch.selectedSets;
-                SetsTextBox.Text = String.Join(", ", selectedSets.Select(x => x.Name));
-            }
+            if (setSearch.ShowDialog() == true) LoadSetsList(setSearch.selectedSets);
         }
 
         private void Click_File(object sender, RoutedEventArgs e)

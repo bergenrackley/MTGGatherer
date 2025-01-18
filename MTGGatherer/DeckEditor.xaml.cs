@@ -13,11 +13,15 @@ namespace MTGGatherer
     public partial class DeckEditor : Window
     {
         private DeckViewModel deckViewModel;
+        SettingsController settingsController = new SettingsController();
+
         public DeckEditor(DeckViewModel DVM)
         {
             InitializeComponent();
             deckViewModel = DVM;
+            CardBackText.Text = settingsController.GetConfigurationValue("CardBackUrl");
             CardItemsListBox.ItemsSource = deckViewModel.Cards;
+            Export.Content = $"Export {deckViewModel.Cards.Count.ToString()} cards";
         }
 
         private void CardItemsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -39,6 +43,8 @@ namespace MTGGatherer
 
         private async void Click_Export(object sender, RoutedEventArgs e)
         {
+            settingsController.SaveSettings(CardBackText.Text, "CardBackUrl");
+
             ExportDeck exportDeck = new ExportDeck();
 
             DeckCustom mainDeck = new DeckCustom();
@@ -82,7 +88,6 @@ namespace MTGGatherer
                 }
             }
             mainDeck.DeckIDs = mainDeck.ContainedObjects.Select(e => e.CardID).ToList();
-            SettingsController settingsController = new SettingsController();
             mainArtUrls.Select((url, index) => new { Index = index + 1, CustomCard = new CustomCard(url, settingsController.GetConfigurationValue("CardBackUrl")) }).ToList().ForEach(item => mainDeck.CustomDeck.Add(item.Index.ToString(), item.CustomCard));
             mainDeck.Transform = new Transform(1);
             exportDeck.ObjectStates.Add(mainDeck);
@@ -124,6 +129,11 @@ namespace MTGGatherer
                 ScryfallCard card = JsonConvert.DeserializeObject<ScryfallCard>(jsonResponse);
                 return card;
             }
+        }
+
+        private void Click_Reset(object sender, RoutedEventArgs e)
+        {
+            CardBackText.Clear();
         }
     }
 

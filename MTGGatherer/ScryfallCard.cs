@@ -44,6 +44,8 @@ namespace MTGGatherer
         public string CollectorNumber { get; set; }
         [JsonProperty(PropertyName = "all_parts")]
         public List<RelatedCard> AllParts { get; set; }
+        [JsonIgnore]
+        public bool Sideboard { get; set; }
 
         public string GetFace()
         {
