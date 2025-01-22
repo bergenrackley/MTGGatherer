@@ -74,7 +74,7 @@ namespace MTGGatherer
 
                 if (card.AllParts != null && card.AllParts.Any())
                 {
-                    foreach (RelatedCard relatedCard in card.AllParts.Where(relatedCard => relatedCard.Object == "related_card" && !deckViewModel.Cards.Where(e => relatedCard.Name == (e.FlavorName ?? e.Name)).Any() && !extrasDeck.ContainedObjects.Where(e => relatedCard.Name == e.Nickname).Any()).ToList())
+                    foreach (RelatedCard relatedCard in card.AllParts.Where(relatedCard => relatedCard.Object == "related_card" && !deckViewModel.Cards.Where(e => relatedCard.Name == e.FlavorName || relatedCard.Name == e.Name).Any() && !extrasDeck.ContainedObjects.Where(e => relatedCard.Name == e.Nickname).Any()).ToList())
                     {
                         ScryfallCard newCard = await GetScryfallCardByUri(relatedCard.Uri);
                         extraArtUrls.Add(newCard.GetFaces());

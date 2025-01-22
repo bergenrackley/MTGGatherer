@@ -18,7 +18,7 @@ namespace MTGGatherer
 
         public dynamic GetConfigurationValue(string key)
         {
-            return string.IsNullOrEmpty(ConfigurationManager.AppSettings[key]) ? defaults[key] : ConfigurationManager.AppSettings[key];
+            return string.IsNullOrEmpty(ConfigurationManager.AppSettings[key]) || ConfigurationManager.AppSettings[key] == "null" ? defaults[key] : ConfigurationManager.AppSettings[key];
         }
 
         public void SaveSettings(string value, string key)

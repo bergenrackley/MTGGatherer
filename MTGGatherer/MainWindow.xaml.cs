@@ -36,15 +36,30 @@ namespace MTGGatherer
         {
             InitializeComponent();
 
-            try
+            string jsonString = settingsController.GetConfigurationValue("SetsList");
+            if (!string.IsNullOrWhiteSpace(jsonString) && IsValidJson(jsonString))
             {
-                selectedSets = JsonConvert.DeserializeObject<List<ScryfallSet>>(settingsController.GetConfigurationValue("SetsList"));
+                try
+                {
+                    selectedSets = JsonConvert.DeserializeObject<List<ScryfallSet>>(jsonString);
+                }
+                catch
+                {
+                    selectedSets = new List<ScryfallSet>();
+
+                }
             }
-            catch
-            {
-                selectedSets = new List<ScryfallSet>();
-            }
+
             LoadSetsList(selectedSets);
+        }
+
+        private bool IsValidJson(string jsonString) { 
+            try { 
+                JToken.Parse(jsonString); 
+                return true; 
+            } catch (JsonReaderException) { 
+                return false;
+            } 
         }
 
         public void LoadSetsList(List<ScryfallSet> sets)
